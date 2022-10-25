@@ -1,9 +1,9 @@
-import { render } from "react-dom";
+import ReactDOM from "react-dom";
 import React, { useState, useEffect, useRef } from "react";
-import { Canvas, useThree } from "react-three-fiber";
-import { Html } from "drei";
+import { Canvas, useThree, createRoot } from "@react-three/fiber";
+import { Html } from "@react-three/drei";
 import { Block } from "./blocks";
-import { Shapes, Categories, Box } from "./Home";
+import { Shapes, Categories, Box, RhinoModel2 } from "./Home";
 import state from "./store";
 import "./styles.css";
 
@@ -44,7 +44,7 @@ function App() {
   return (
     <>
       <Canvas
-        colorManagement
+        //colorManagement
         gl={{ alpha: false, antialias: true }}
         camera={{ position: [0, 0, 4.5], fov: 50, near: 0.1, far: 100 }}
         onCreated={({ gl, events }) => {
@@ -107,7 +107,7 @@ function App() {
         </Block>
 
         <Block factor={-2} offset={4}>
-          <Box scale={[2, 2, 2]} />
+          <RhinoModel2 scale={[2, 2, 2]} />
           <Html center portal={domContent}>
             <h2 id="section3">Programmeur</h2>
           </Html>
@@ -127,4 +127,4 @@ function App() {
   );
 }
 
-render(<App />, document.querySelector("#root"));
+ReactDOM.createRoot(document.querySelector("#root")).render(<App />);

@@ -1,5 +1,45 @@
-import React, { useRef, useMemo, useEffect, useState } from "react";
-import { useFrame, useThree } from "react-three-fiber";
+import React, { useRef, useMemo, useEffect, useState, Suspense } from "react";
+import { useFrame, useThree, useLoader } from "@react-three/fiber";
+import { ContactShadows, useGLTF } from "@react-three/drei";
+import { Rhino3dmLoader } from "three/examples/jsm/loaders/3DMLoader";
+
+export function RhinoModel1(props) {
+  console.log("test");
+  const modelSource = useLoader(
+    Rhino3dmLoader,
+    "./draco-gltf/test1.3dm",
+    (loader) => {
+      loader.setLibraryPath(
+        "https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/"
+      );
+    }
+  );
+
+  console.log("modelSource", modelSource);
+
+  return <primitive object={modelSource} />;
+}
+
+export function RhinoModel2(props) {
+  console.log("test");
+  const modelSource = useLoader(
+    Rhino3dmLoader,
+    "./draco-gltf/test2.3dm",
+    (loader) => {
+      loader.setLibraryPath(
+        "https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/"
+      );
+    }
+  );
+
+  console.log("modelSource", modelSource);
+  //faire surnager le modele
+  const ref = useWobble(0.5, "cos");
+  //faire tourner le modele sur lui-meme
+  useFrame(() => (ref.current.rotation.y += 0.01));
+
+  return <primitive object={modelSource} ref={ref} />;
+}
 
 /**
  * Déclaration des éléments à intégrer à index.js
@@ -40,12 +80,33 @@ export function Box(props) {
       onPointerOver={() => set(true)}
       onPointerOut={() => set(false)}
     >
-      <boxBufferGeometry attach="geometry" />
+      <boxGeometry attach="geometry" />
       <meshStandardMaterial
         attach="material"
         color={hovered ? "hotpink" : "white"}
       />
+      {/* <ContactShadows
+        position={[0, -1, 0]}
+        scale={10}
+        far={3}
+        blur={3}
+        rotation={[Math.PI / 2, 0, 0]}
+        color={"black"}
+      /> */}
     </mesh>
+  );
+}
+
+function SuzanneWithLocal() {
+  const { nodes, materials } = useGLTF("suzanne.glb", "/draco-gltf/");
+
+  return (
+    <group dispose={null}>
+      <mesh
+        material={materials["Material.001"]}
+        geometry={nodes.Suzanne.geometry}
+      />
+    </group>
   );
 }
 
@@ -55,6 +116,9 @@ export function Box(props) {
  * @returns
  */
 export function Shapes() {
+
+  //console.log("nodes", nodes);
+
   const {
     viewport: { width, height },
   } = useThree();
@@ -66,6 +130,15 @@ export function Shapes() {
         position={[-width * 0.8, height * -3, -5]}
         scale={[ringSize, ringSize, 1]}
       />
+
+      <Suspense fallback={null}>
+        <RhinoModel1 />
+      </Suspense>
+
+      {/* <Suspense fallback={null}>
+        <RhinoModel2 />
+      </Suspense> */}
+
       <Cross
         position={[-width / 2.5, height / 8, -1]}
         scale={[crossSize, crossSize, 1]}
@@ -91,7 +164,7 @@ export function Shapes() {
 function Ring(props) {
   return (
     <mesh {...props}>
-      <ringBufferGeometry attach="geometry" args={[1, 1.4, 64]} />
+      <ringGeometry attach="geometry" args={[1, 1.4, 64]} />
       <meshBasicMaterial
         attach="material"
         color="#FFF9BE"
@@ -110,7 +183,7 @@ function Cross(props) {
     <group ref={ref}>
       <group ref={inner} {...props}>
         <mesh>
-          <planeBufferGeometry attach="geometry" args={[2, 0.5]} />
+          <planeGeometry attach="geometry" args={[2, 0.5]} />
           <meshBasicMaterial
             attach="material"
             color="#FFEDDD"
@@ -118,7 +191,7 @@ function Cross(props) {
           />
         </mesh>
         <mesh position={[0, -0.625, 0]}>
-          <planeBufferGeometry attach="geometry" args={[0.5, 0.75]} />
+          <planeGeometry attach="geometry" args={[0.5, 0.75]} />
           <meshBasicMaterial
             attach="material"
             color="#FFEDDD"
@@ -126,7 +199,7 @@ function Cross(props) {
           />
         </mesh>
         <mesh position={[0, 0.625, 0]}>
-          <planeBufferGeometry attach="geometry" args={[0.5, 0.75]} />
+          <planeGeometry attach="geometry" args={[0.5, 0.75]} />
           <meshBasicMaterial
             attach="material"
             color="#FFEDDD"
@@ -144,7 +217,7 @@ function Minus(props) {
     <group ref={ref}>
       <group {...props}>
         <mesh>
-          <planeBufferGeometry attach="geometry" args={[2, 0.7]} />
+          <planeGeometry attach="geometry" args={[2, 0.7]} />
           <meshBasicMaterial
             attach="material"
             color="#DEF5FF"
